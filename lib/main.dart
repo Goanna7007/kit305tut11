@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:kit305tut11/movie.dart';
+import 'package:provider/provider.dart';
+
+import 'movie_details.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,12 +14,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider(
+      create: (context) => MovieModel(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const MyHomePage(title: 'List Tutorial'),
       ),
-      home: const MyHomePage(title: 'List Tutorial'),
     );
   }
 }
@@ -31,22 +37,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Movie> movies = [
-    Movie(
-        title: "Lord of the Rings",
-        year: 2001,
-        duration: 9001,
-        image:
-            "https://upload.wikimedia.org/wikipedia/en/8/8a/The_Lord_of_the_Rings_The_Fellowship_of_the_Ring_%282001%29.jpg"),
-    Movie(
-        title: "The Matrix",
-        year: 1999,
-        duration: 150,
-        image:
-            "https://upload.wikimedia.org/wikipedia/en/c/c1/The_Matrix_Poster.jpg")
-  ];
   @override
   Widget build(BuildContext context) {
+    return Consumer<MovieModel>(builder: buildScaffold);
+  }
+
+  Scaffold buildScaffold(BuildContext context, MovieModel movieModel, _) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -58,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
               child: ListView.builder(
                   itemBuilder: (_, index) {
-                    var movie = movies[index];
+                    var movie = movieModel.items[index];
                     final image = movie.image;
                     return ListTile(
                       title: Text(movie.title),
@@ -67,9 +63,15 @@ class _MyHomePageState extends State<MyHomePage> {
                           movie.duration.toString() +
                           " Hours"),
                       leading: image != null ? Image.network(image) : null,
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return MovieDetails(id: index);
+                        }));
+                      },
                     );
                   },
-                  itemCount: movies.length),
+                  itemCount: movieModel.items.length),
             )
           ],
         ),
